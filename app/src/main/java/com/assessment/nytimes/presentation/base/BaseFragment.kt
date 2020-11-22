@@ -1,0 +1,92 @@
+package com.assessment.nytimes.presentation.base
+
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.annotation.LayoutRes
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.assessment.nytimes.utils.NavigationCommand
+import dagger.android.support.AndroidSupportInjection
+import javax.inject.Inject
+
+abstract class BaseFragment<T : ViewDataBinding, V : BaseViewModel> : Fragment() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    lateinit var viewDataBinding: T
+        private set
+
+    val injectedViewModel: V by lazy { ViewModelProvider(this, viewModelFactory).get(viewModel) }
+
+    @get:LayoutRes
+    abstract val bindingVariable: Int
+
+    @get:LayoutRes
+    abstract val layoutId: Int
+
+    abstract val viewModel: Class<V>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        initializeDependencyInjection()
+
+        super.onCreate(savedInstanceState)
+
+        subscribeToNetworkLiveData()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewDataBinding = DataBindingUtil.inflate(inflater, layoutId, container, false)
+        return viewDataBinding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewDataBinding.setVariable(bindingVariable, injectedViewModel)
+        viewDataBinding.lifecycleOwner = viewLifecycleOwner
+        viewDataBinding.executePendingBindings()
+
+        subscribeToViewLiveData()
+        subscribeToNavigationLiveData()
+    }
+
+    private fun initializeDependencyInjection() {
+        AndroidSupportInjection.inject(this)
+    }
+
+    open fun subscribeToViewLiveData() {
+
+        injectedViewModel.hideKeyboard.observe(viewLifecycleOwner, Observer {
+            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(activity?.currentFocus?.windowToken, 0)
+        })
+    }
+
+    open fun subscribeToNetworkLiveData() {
+        //All Network Tasks
+    }
+
+    open fun subscribeToNavigationLiveData() {
+
+        injectedViewModel.navigationCommands.observe(viewLifecycleOwner, Observer {
+
+            when (it) {
+                is NavigationCommand.To -> findNavController().navigate(it.directions)
+                is NavigationCommand.Back -> findNavController().popBackStack()
+            }
+        })
+    }
+}

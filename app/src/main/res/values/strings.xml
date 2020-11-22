@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">NY Times Articles App</string>
+
+    <string name="_ok">OK</string>
+
+    <string name="main_screen_title">NY Times Most Popular Articles</string>
+
+    <string name="detail_screen_title">Details</string>
+    <string name="thumbnail_desc">Article thumbnail</string>
+</resources>

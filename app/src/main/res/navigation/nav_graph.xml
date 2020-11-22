@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/articles">
+
+    <fragment
+        android:id="@+id/articles"
+        android:name="com.assessment.nytimes.presentation.articles.ArticlesFragment"
+        android:label="@string/main_screen_title"
+        tools:layout="@layout/articles_fragment">
+        <action
+            android:id="@+id/action_articles_to_details"
+            app:destination="@id/details" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/details"
+        android:name="com.assessment.nytimes.presentation.detail.ArticleDetailFragment"
+        android:label="@string/detail_screen_title"
+        tools:layout="@layout/article_detail_fragment">
+        <argument
+            android:name="article"
+            app:argType="com.assessment.nytimes.data.model.Article" />
+    </fragment>
+
+</navigation>
